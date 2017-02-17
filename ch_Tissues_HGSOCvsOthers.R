@@ -40,7 +40,7 @@ for (i in 1:6){
 	expSet$pVal = fit2$p.value
 	expSet$AdjPVal = p.adjust(fit2$p.value, method="BH")
 	#order the data
-	expSet = expSet[order(expSet$AdjPVal),]
+	expSet = expSet[order(-expSet$logFC),]
 	#input into the list
 	hgsCompare[[i]] = expSet[,c(1,87:89)]
 	#names(hgsCompare)[i] = paste('hgs',i,sep='')	
@@ -54,32 +54,63 @@ for (i in 1:length(hgsCompare)){
 
 ########plot the two cases of interest
 proh = hgsCompare[[6]]
-#make a plot of the data
-proSD<-sd(proh$logFC, na.rm=TRUE)
-#sort out colors
-lnCols<-brewer.pal(6,"Blues")
-cols<-rev(brewer.pal(6,"RdBu"))
-
+#proh = hug[,c(1,9)]
+#proh[,2] = log2(proh[,2])
+#proh = proh[order(proh$hgs6),]
+#make a target gene list
+geneSet = c('SMTN','FN1','TAGLN','CTHRC1','MMP2','ITGA5','CRABP2','CRYAB','KRT17','KRT19','CDH1','MSLN','MUC1','CTH','QPCT')
+#assign size and colors
+cols = brewer.pal(6,'YlOrRd')
+proh$colors = 'grey80'
+proh$sizes = 2
+geneSpots = proh$Gene %in% geneSet
+proh[geneSpots,5] = cols[5]
+proh[geneSpots,6] = 4
 ###make an initial plot with all points
-pdf('ch_OvC_TMT10_FFPE_Human_Proteins_HGSvCCC_Volcano.pdf')
-xCol = col2rgb(ifelse(proh$Gene %in% markCCC, cols[1], ifelse(proh$Gene %in% markHGS, cols[6],'gray80')))
-xCex = ifelse(proh$Gene %in% markHGSCCC, 2, 1)
-plot(proh$logFC,
-		-log10(proh$score),
-		col=rgb(xCol[1,],xCol[2,],xCol[3,],95,maxColorValue=255),
-		pch=20,
-		cex = xCex,
-		ylab = '-log10(Adjusted p-value)',
-		xlab = 'log2(serous/clear cell)',
-		main = 'OvC type comparison',
-		xlim = c(-5,5),
-		ylim = c(0,5)
+pdf('ch_OvC-Tissues_Patient-6_RankedAbundance.pdf')
+plot(proh[,2],
+		col = proh$colors,
+		cex = proh$sizes,
+		pch = 20,
+		ylim = c(-4,4)
 )
-box(lwd=3)
-abline(v = -proSD, col=lnCols[6],lwd=2,lty=2)
-abline(v = proSD, col=lnCols[6],lwd=2,lty=2)
-abline(h = -log10(0.05), col=lnCols[6],lwd=2,lty=2)
-text(4,0.5,paste('n=',nrow(proh),sep=""),cex=1.25)
-text(4,2.3,paste('p<0.05'),cex=1.25)
+text(proh[geneSpots,2], proh[geneSpots,1])
+dev.off()
 
 
+
+#make ranked heatmap for expression in single patient
+proh = hug[,c(1,9)]
+proh[,2] = log2(proh[,2])
+proh = proh[order(-proh$hgs6),]
+proh = proh[!is.na(proh$hgs6),]
+geneSpots = proh$Gene %in% geneSet
+proh[!geneSpots,1] = ''
+rankIN = as.matrix(cbind(proh$hgs6,proh$hgs6))
+
+mybreaks = seq(-2,2,by=0.05)
+pdf('ch_OvC-Tissues_Patient-6_RankedAbundanceHeat.pdf')
+heatmap.2(rankIN,
+		col= rev(colorRampPalette(brewer.pal(6,"RdBu"))(length(mybreaks)-1)),
+		symkey=TRUE,
+		Rowv=FALSE,
+		Colv=FALSE,
+		labRow = proh[,1],
+		## color key
+		key = TRUE,
+		keysize = 1,
+		density.info = "none",
+		scale = "none",
+		trace = "none",
+		mar=c(8,8),
+		cexRow=0.25,
+		cexCol=0.75
+		
+)
+dev.off()
+
+
+		
+		
+		
+		

@@ -7,8 +7,8 @@ setwd(dir="/Users/cshughes/Documents/projects/clinicalProteomics/Hughes-Coscia_E
 #make a data holder
 ids = list()
 #read in the Hughes data
-ids[[1]] = readRDS('/Users/cshughes/Documents/projects/clinicalProteomics/Hughes_2016/Routput/ch_feb2017_OvC_cell-line_proteinSet_1.rds')
-ids[[2]] = readRDS('/Users/cshughes/Documents/projects/clinicalProteomics/Hughes_2016/Routput/ch_feb2017_OvC_cell-line_proteinSet_2.rds')
+ids[[1]] = readRDS('/Users/cshughes/Documents/projects/clinicalProteomics/hughes_celllines_2016/Routput/ch_feb2017_OvC_cell-line_proteinSet_1.rds')
+ids[[2]] = readRDS('/Users/cshughes/Documents/projects/clinicalProteomics/hughes_celllines_2016/Routput/ch_feb2017_OvC_cell-line_proteinSet_2.rds')
 #read in the Coscia data
 ids[[3]] = readRDS('/Users/cshughes/Documents/projects/clinicalProteomics/Coscia_2016/Routput/ch_feb2017_Coscia_cell-line_proteinSet.rds')
 names(ids) = c('h1','h2','c1')
@@ -33,7 +33,7 @@ allData = merge(hData,ids[[3]],by='Gene')
 #z-score the data
 allData[,2:13] = scale(allData[,2:13],center=TRUE,scale=TRUE)
 #build the heatmap with clustering
-ovCor = cor(allData[,c(2:13)], use='pairwise.complete.obs', method='pearson')
+ovCor = cor(allData[,c(2:13)], use='pairwise.complete.obs', method='spearman')
 ovCor[upper.tri(ovCor)] <- NA
 #ovCor[lower.tri(ovCor)] <- ovCorB[lower.tri(ovCorB)]
 #make the plot
